@@ -4,7 +4,6 @@ from langchain.agents import Tool
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import LLMChain
-from typing import Any, Dict, Iterator, List, Optional
 
 from langchain_core.callbacks import (
     CallbackManagerForLLMRun,
@@ -15,20 +14,16 @@ from langchain_core.messages import (
     AIMessageChunk,
     BaseMessage,
 )
-
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-from pydantic import Field
+
 import sys
 from tools import *
+from model import DeepSeek_R1
+from typing import Any, Dict, Iterator, List, Optional
 
 
 # YOUR-API-KEY 均为你选用的模型的密钥。这里用 DeepSeek
-os.environ['OPENAI_API_KEY'] = 'YOUR-API-KEY'
-llm = ChatOpenAI(model='deepseek-chat',
-                 base_url='https://api.deepseek.com/v1',
-                 api_key='YOUR-API-KEY',
-)
+llm = DeepSeek_R1().getLLM()
 tools = [Tool(func=weather_tool,
                 name="weather_tool",
                 description='用于查询城市天气。输入是一个城市名称')]
