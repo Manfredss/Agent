@@ -67,7 +67,7 @@ Thought: {agent_scratchpad}
 agent = create_react_agent(
                          tools=tools,
                          llm=llm,
-                         prompt=ChatPromptTemplate.from_template(PROMPT))
+                         prompt=ChatPromptTemplate.from_template(PREFIX + SUFFIX))
 agent = AgentExecutor(agent=agent, 
                       tools=tools,
                       verbose=True)
