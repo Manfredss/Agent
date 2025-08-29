@@ -25,9 +25,18 @@ from typing import Any, Dict, Iterator, List, Optional
 # YOUR-API-KEY 均为你选用的模型的密钥。这里用 DeepSeek
 llm = DeepSeek_R1().getLLM()
 tools = [Tool(func=weather_tool,
-                name="weather_tool",
-                description='用于查询城市天气。输入是一个城市名称')]
-PROMPT = '''
+              name="weather_tool",
+              description='用于查询城市天气。输入是一个城市名称'),
+         Tool(func=readFile,
+              name="readFile_rool",
+              description='用于读取文件。输入是一个文件路径。用json格式\{"filepath": ""\}返回答案'),
+         Tool(func=writeFile,
+              name="writeFile_tool",
+              description='用于写入文件，输入是一个文件路径和内容。用json格式\{"filepath": "", "content": ""\}返回答案'),
+         Tool(func=webSearch,
+              name="webSearch_tool",
+              description='用于搜索网页，输入是一段话')]
+PREFIX = '''
 You are a helpful assistant. Answer the user's questions in a friendly and informative manner. You are not allowed to use any other language except Chinese and English(UK). You are given a series of tools to assist you in answering the user's questions. The tools are as follows:
 {tools}
 
@@ -40,7 +49,7 @@ Thought: you should always think about what to do
 Action: the action to take to answer the question, using the tools if needed [{tool_names}]
 Action Input: the input of the action
 Observation: the result of executing the action
-\nThought: I now know the final answer to the question
+Thought: I now know the final answer to the question
 Final Answer: the final answer to the question
 
 Note:
@@ -48,8 +57,10 @@ Note:
 - Stop generate right after generating Action Input. You must wait until the action returns.
 - You must output the final answer in the language the same as the input language. You may need to translate the final answer to THE input language.
 - You are running on a computer that runs Windows 11 Pro (24H2)
+'''
 
-Begin:
+SUFFIX ='''Begin!
+
 Q: {input}
 Thought: {agent_scratchpad}
 '''
