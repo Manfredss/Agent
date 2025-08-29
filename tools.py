@@ -1,11 +1,13 @@
 import json, os, requests
 from datetime import datetime
-from typing import Dict, Type
+from typing import Any, Dict, Type
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
+from langchain_tavily import TavilySearch
 
 WEATHER_API_HOST = 'YOUR-API-HOST'
 WEATHER_API_KEY = 'YOUR-API-KEY'
+TAVILY_API_KEY = 'YOUR-API-KEY'
 DATE = datetime.now().strftime("%Y-%m-%d")
 
 def weather_tool(city_name: str) -> Dict | None:
@@ -71,3 +73,42 @@ def weather_tool(city_name: str) -> Dict | None:
 # 异步调用版
 async def weather_tool_async(self, city: str) -> str:
     raise NotImplementedError("This tool does not support async")
+
+def readFile(pkg):
+    ''' 读取文件内容 '''
+    try:
+        pkg = json.loads(pkg)
+        filepath = os.path.join(os.path.dirname(__file__), pkg['filepath'])
+        with open(filepath, 'r', encoding='utf-8') as f:
+            return f.read()
+    except Exception as e:
+        print(e)
+    
+def writeFile(pkg):
+    ''' 将内容写入文件 '''
+    try:
+        pkg = json.loads(pkg)
+        filepath = os.path.join(os.path.dirname(__file__), pkg['filepath'])
+        print(filepath)
+        content = pkg['content']
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content.replace('\\n', '\n'))
+        return '\nWrite Success\n'
+    except Exception as e:
+        print(e)
+
+def webSearch(query: str, **kwargs) -> Dict[str, Any]:
+    os.environ['TAVILY_API_KEY'] = TAVILY_API_KEY
+    search = TavilySearch(max_results=5,
+                          topic='general',
+                          advanced_search=True,
+                          include_answers=True,
+                          include_images=False,
+                          include_raw_content=False)
+    results = search.invoke({'query': query}, **kwargs)
+    cleaned_results: Dict[str, Any] = {'answer': results.get('answer'),
+                                       'results': [{'title': item.get('title'),
+                                                    'url': item.get('url'),
+                                                    'content': item.get('content') or item.get("raw_content")} 
+                                    for item in results.get('results', [])]}
+    return cleaned_results
